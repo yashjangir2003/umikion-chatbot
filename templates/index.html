@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Umikion</title>
+    <style>
+        body { font-family: Arial; background: #0f3944; }
+        .chatbox {
+    width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    border-radius: 15px;
+
+    background: rgba(255, 255, 255, 0.15); /* transparent */
+    backdrop-filter: blur(15px); /* blur effect */
+    -webkit-backdrop-filter: blur(15px);
+
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.chatbox, h2 {
+    color: white;
+}
+       #messages {
+    height: 300px;
+    overflow-y: scroll;
+    padding: 10px;
+
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+       input {
+    width: 80%;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+        button { padding: 10px;}
+        button{background: #0d3136;
+             color: #f7f7f7; 
+             border-radius: 10px; 
+             cursor: pointer; 
+        }
+        button:hover{
+            background-color: #004052;
+        }
+        .user-msg {
+    background: #0d3136;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 10px;
+    margin: 5px;
+    max-width: 70%;
+    margin-left: auto;
+}
+#messages {
+    scroll-behavior: smooth;
+}
+.header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo {
+    width: 40px;
+    height: 40px;
+}
+.logo {
+    width: 40px;
+    filter: drop-shadow(0 0 5px #00e5ff);
+}
+.bot-msg {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 10px;
+    margin: 5px;
+    max-width: 70%;
+}
+.typing {
+    opacity: 0.7;
+    font-style: italic;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 0.3; }
+    50% { opacity: 1; }
+    100% { opacity: 0.3; }
+}
+        body {
+    background-image: url("https://images.unsplash.com/photo-1510915228340-29c85a43dcfe");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+    </style>
+</head>
+<body>
+
+<div class="chatbox">
+   <div class="header">
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
+    <h2>UMIKION Chatbot</h2>
+</div>
+    <div id="messages"></div>
+    <input type="text" id="userInput" placeholder="Type message...">
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    document.getElementById("userInput").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+        sendMessage();
+    }
+});
+function sendMessage() {
+    let userInput = document.getElementById("userInput").value;
+
+    let messages = document.getElementById("messages");
+
+    // Show user message
+    messages.innerHTML += `<div class="user-msg">${userInput}</div>`;
+
+    // Show typing animation
+    messages.innerHTML += `<div class="bot-msg typing">Typing...</div>`;
+    messages.scrollTop = messages.scrollHeight;
+
+    fetch("/get", {
+        method: "POST",
+        body: new URLSearchParams({msg: userInput}),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+    })
+    .then(res => res.json())
+    .then(data => {
+        // Remove typing
+        document.querySelector(".typing").remove();
+
+        // Show bot response
+        messages.innerHTML += `<div class="bot-msg">${data.response}</div>`;
+        messages.scrollTop = messages.scrollHeight;
+    });
+
+    document.getElementById("userInput").value = "";
+}
+</script>
+
+</body>
+</html>
